@@ -33,12 +33,15 @@
     margin-bottom: 20px;
     background-color: #f7f9fc;
   }
+  .quote-container {
+    margin-bottom: 20px; /* 语录之间的间距 */
+  }
   .quote-origin {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    font-style: italic;
+    display: block;
+    text-align: right; /* 右对齐 */
     color: #666;
+    margin-top: 10px; /* 调整作者名称与语录之间的间距 */
+    font-style: normal; /* 去除斜体 */
   }
   .button {
     padding: 10px;
@@ -160,16 +163,23 @@
   function displayMultipleQuotes(count) {
     const quoteBox = document.getElementById('quoteBox');
     quoteBox.innerHTML = ''; // 清空内容
+
     for (let i = 0; i < count; i++) {
       const quote = getRandomQuote();
       if (quote) {
+        const container = document.createElement('div');
+        container.classList.add('quote-container');
+
         const quoteElement = document.createElement('p');
         quoteElement.textContent = quote.text;
+
         const originElement = document.createElement('span');
         originElement.textContent = `- ${quote.origin}`;
         originElement.classList.add('quote-origin');
-        quoteBox.appendChild(quoteElement);
-        quoteBox.appendChild(originElement);
+
+        container.appendChild(quoteElement);
+        container.appendChild(originElement);
+        quoteBox.appendChild(container);
       }
     }
   }
@@ -194,7 +204,7 @@
     const favorites = document.getElementById('favorites');
     favorites.style.display = favorites.style.display === 'block' ? 'none' : 'block';
     favorites.classList.toggle('expanded'); // 切换展开状态
-    document.getElementById('favoritesList').innerHTML = favoritesQuotes.map(item => `<li>${item.text} -${item.origin}</li>`).join('');
+    document.getElementById('favoritesList').innerHTML = favoritesQuotes.map(item => `<li>${item.text} - ${item.origin}</li>`).join('');
   }
 
   document.getElementById('randomQuoteBtn').addEventListener('click', displayRandomQuote);
