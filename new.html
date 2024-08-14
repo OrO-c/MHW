@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>随机弱智语录</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM3PHLM4hFWg4L/RtmA3y4dxP5qseZ8SiZ3K9ux" crossorigin="anonymous">
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+  }
+  .container {
+    border: none;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #fff;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+  }
+  .quote-box {
+    position: relative;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background-color: #f7f9fc;
+  }
+  .quote-origin {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-style: italic;
+    color: #666;
+  }
+  .button {
+    padding: 10px;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    outline: none;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
+  .save-btn {
+    background-color: #f44336;
+  }
+  .show-btn {
+    background-color: #ff9800;
+  }
+  .random-quote-btn {
+    background-color: #4CAF50; 
+  }
+  .multi-draw-container {
+    margin-top: 20px;
+  }
+  .multi-draw-container input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-right: 10px;
+    width: 80px;
+    text-align: center;
+    font-size: 16px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    cursor: pointer;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>随机弱智语录</h1>
+  <div class="quote-box" id="quoteBox">
+    <p id="quoteText">点击按钮获取随机发病</p>
+    <span class="quote-origin" id="quoteOrigin"></span>
+  </div>
+  <div>
+    <button class="button random-quote-btn" id="randomQuoteBtn">
+      <i class="fas fa-random"></i>
+    </button>
+    <button class="button save-btn" id="saveBtn">
+      <i class="fas fa-heart"></i>
+    </button>
+    <button class="button show-btn" id="showBtn">
+      <i class="fas fa-bookmark"></i>
+    </button>
+  </div>
+  <div class="multi-draw-container">
+    <input type="number" id="drawCount" min="1" placeholder="次数">
+    <button class="button random-quote-btn" id="multiDrawBtn">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  let quotes = [];
+
+  function readTextFile(file) {
+    return new Promise((resolve, reject) => {
+      const rawFile = new XMLHttpRequest();
+      rawFile.open("GET", file, true);
+      rawFile.onreadystatechange = function () {
+        if (rawFile.readyState === 4) {
+          if (rawFile.status === 200 || rawFile.status == 0) {
+            resolve(rawFile.responseText);
+          } else {
+            reject(new Error('Failed to read file'));
+          }
+        }
+      };
+      rawFile.send(null);
+    });
+  }
+
+  async function loadQuotes() {
+    try {
+      const text = await readTextFile('quotes.txt'); // 修改为外部文案文件
+      quotes = text.split('\n').filter(Boolean).map(line => {
+        const [text, origin] = line.split('|');
+        return { text: text.trim(), origin: origin.trim() };
+      });
+      displayRandomQuote();
+    } catch (error) {
+      console.error('读取文案文件失败:', error);
+      document.getElementById('quoteText').textContent = '读取文案文件失败';
+    }
+  }
+
+  function getRandomQuote() {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    return quotes[randomIndex];
+  }
+
+  function displayRandomQuote() {
+    const quote = getRandomQuote();
+    if (quote) {
+      document.getElementById('quoteText').textContent = quote.text;
+      document.getElementById('quoteOrigin').textContent = `- ${quote.origin}`;
+    }
+  }
+
+  function displayMultipleQuotes(count) {
+    const quoteBox = document.getElementById('quoteBox');
+    quoteBox.innerHTML = ''; // 清空内容
+    for (let i = 0; i < count; i++) {
+      const quote = getRandomQuote();
+      if (quote) {
+        const quoteElement = document.createElement('p');
+        quoteElement.textContent = quote.text;
+        const originElement = document.createElement('span');
+        originElement.textContent = `- ${quote.origin}`;
+        originElement.classList.add('quote-origin');
+        quoteBox.appendChild(quoteElement);
+        quoteBox.appendChild(originElement);
+      }
+    }
+  }
+
+  function saveQuote() {
+    const quote = {
+      text: document.getElementById('quoteText').textContent,
+      origin: document.getElementById('quoteOrigin').textContent.replace('- ', '')
+    };
+    let favoritesQuotes = JSON.parse(localStorage.getItem('favoritesQuotes')) || [];
+    if (!favoritesQuotes.some(item => item.text === quote.text)) {
+      favoritesQuotes.push(quote);
+      localStorage.setItem('favoritesQuotes', JSON.stringify(favoritesQuotes));
+      alert('语录已收藏！');
+    } else {
+      alert('该语录已收藏！');
+    }
+  }
+
+  function toggleFavorites() {
+    const favoritesQuotes = JSON.parse(localStorage.getItem('favoritesQuotes')) || [];
+    const favorites = document.getElementById('favorites');
+    favorites.style.display = favorites.style.display === 'block' ? 'none' : 'block';
+    favorites.classList.toggle('expanded'); // 切换展开状态
+    document.getElementById('favoritesList').innerHTML = favoritesQuotes.map(item => `<li>${item.text} -${item.origin}</li>`).join('');
+  }
+
+  document.getElementById('randomQuoteBtn').addEventListener('click', displayRandomQuote);
+  document.getElementById('saveBtn').addEventListener('click', saveQuote);
+  document.getElementById('showBtn').addEventListener('click', toggleFavorites);
+  document.getElementById('multiDrawBtn').addEventListener('click', () => {
+    const count = parseInt(document.getElementById('drawCount').value) || 1;
+    displayMultipleQuotes(count);
+  });
+
+  // 加载文案
+  loadQuotes();
+
+</script>
+</body>
+</html>
