@@ -35,12 +35,18 @@
   }
   .quote-container {
     margin-bottom: 20px; /* 语录之间的间距 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .quote-text {
+    flex-grow: 1;
+    margin-right: 10px;
   }
   .quote-origin {
     display: block;
     text-align: right; /* 右对齐 */
     color: #666;
-    margin-top: 10px; /* 调整作者名称与语录之间的间距 */
     font-style: normal; /* 去除斜体 */
   }
   .button {
@@ -95,6 +101,13 @@
     cursor: pointer;
     margin-bottom: 5px;
   }
+  .favorites-list {
+    display: none;
+    margin-top: 20px;
+    text-align: left;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
 </style>
 </head>
 <body>
@@ -121,6 +134,7 @@
       <i class="fas fa-sync-alt"></i> 多次抽取
     </button>
   </div>
+  <div id="favoritesList" class="favorites-list"></div>
 </div>
 
 <script>
@@ -184,22 +198,27 @@
 
         const quoteElement = document.createElement('p');
         quoteElement.textContent = quote.text;
+        quoteElement.classList.add('quote-text');
 
         const originElement = document.createElement('span');
         originElement.textContent = `- ${quote.origin}`;
         originElement.classList.add('quote-origin');
 
+        const saveButton = document.createElement('button');
+        saveButton.classList.add('button', 'save-btn');
+        saveButton.innerHTML = '<i class="fas fa-heart"></i> 收藏';
+        saveButton.addEventListener('click', () => saveSpecificQuote(quote));
+
         container.appendChild(quoteElement);
         container.appendChild(originElement);
+        container.appendChild(saveButton);
         quoteBox.appendChild(container);
       }
     }
+    currentQuote = null; // 防止误收藏
   }
 
-  function saveQuote() {
-    const quote = currentQuote;
-    if (!quote) return; // 如果没有当前语录则返回
-
+  function saveSpecificQuote(quote) {
     let favoritesQuotes = JSON.parse(localStorage.getItem('favoritesQuotes')) || [];
     if (!favoritesQuotes.some(item => item.text === quote.text)) {
       favoritesQuotes.push(quote);
@@ -210,12 +229,26 @@
     }
   }
 
+  function saveQuote() {
+    const quote = currentQuote;
+    if (!quote) return; // 如果没有当前语录则返回
+
+    saveSpecificQuote(quote);
+  }
+
   function toggleFavorites() {
     const favoritesQuotes = JSON.parse(localStorage.getItem('favoritesQuotes')) || [];
-    const favorites = document.getElementById('favorites');
-    favorites.style.display = favorites.style.display === 'block' ? 'none' : 'block';
-    favorites.classList.toggle('expanded'); // 切换展开状态
-    document.getElementById('favoritesList').innerHTML = favoritesQuotes.map(item => `<li>${item.text} - ${item.origin}</li>`).join('');
+    const favoritesList = document.getElementById('favoritesList');
+    if (favoritesList.style.display === 'block') {
+      favoritesList.style.display = 'none';
+    } else {
+      favoritesList.style.display = 'block';
+      if (favoritesQuotes.length === 0) {
+        favoritesList.innerHTML = '<p>暂无收藏。</p>';
+      } else {
+        favoritesList.innerHTML = favoritesQuotes.map(item => `<p>${item.text} - ${item.origin}</p>`).join('');
+      }
+    }
   }
 
   document.getElementById('randomQuoteBtn').addEventListener('click', displayRandomQuote);
