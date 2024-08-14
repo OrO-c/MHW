@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>随机弱智语录</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM3PHLM4hFWg4L/RtmA3y4dxP5qseZ8SiZ3K9ux" crossorigin="anonymous">
+<title>随机弱智语录(改)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM3PHLM4hFWg4dxP5qseZ8SiZ3K9ux" crossorigin="anonymous">
 <style>
   body {
     font-family: 'Arial', sans-serif;
@@ -189,6 +189,7 @@
   function displayMultipleQuotes(count) {
     const quoteBox = document.getElementById('quoteBox');
     quoteBox.innerHTML = ''; // 清空内容
+    let lastQuote = null; // 保存最后一次抽取的语录
 
     for (let i = 0; i < count; i++) {
       const quote = getRandomQuote();
@@ -213,9 +214,11 @@
         container.appendChild(originElement);
         container.appendChild(saveButton);
         quoteBox.appendChild(container);
+
+        lastQuote = quote; // 更新最后一次抽取的语录
       }
     }
-    currentQuote = null; // 防止误收藏
+    currentQuote = lastQuote; // 将最后一次抽取的语录保存为 currentQuote
   }
 
   function saveSpecificQuote(quote) {
@@ -255,13 +258,11 @@
   document.getElementById('saveBtn').addEventListener('click', saveQuote);
   document.getElementById('showBtn').addEventListener('click', toggleFavorites);
   document.getElementById('multiDrawBtn').addEventListener('click', () => {
-    const count = parseInt(document.getElementById('drawCount').value) || 1;
-    displayMultipleQuotes(count);
+    const drawCount = parseInt(document.getElementById('drawCount').value) || 1;
+    displayMultipleQuotes(drawCount);
   });
 
-  // 加载文案
-  loadQuotes();
-
+  loadQuotes(); // 页面加载时读取文案文件
 </script>
 </body>
 </html>
